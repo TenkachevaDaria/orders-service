@@ -10,7 +10,7 @@ public class Product : BaseEntity
     public string Name { get; set; }
     
     [Column("price")]
-    public long Price { get; set; }
+    public decimal Price { get; set; }
     
     [Column("quantity")]
     public int Quantity { get; set; }

@@ -67,37 +67,37 @@ public class InventoryService : IInventoryService
         }
     }
 
-    public async Task<Result<long>> ReserveItemsAsync(IReadOnlyList<OrderItemDto> itemDtos)
+    public async Task<Result<decimal>> ReserveItemsAsync(IReadOnlyList<OrderItemDto> itemDtos)
     {
         try
         {
-            var totalPrice = 0;
+            decimal totalPrice = 0;
             foreach (var item in itemDtos)
             {
                 var itemResult = await ReserveItemAsync(item);
                 if (!itemResult.Succeeded)
                 {
                     _logger.LogError("Failed to reserve item");
-                    return await Result<long>.FailureAsync($"Ошибка {string.Join(',', itemResult.Errors)}");
+                    return await Result<decimal>.FailureAsync($"Ошибка {string.Join(',', itemResult.Errors)}");
                 }
-                totalPrice += item.Quantity;
+                totalPrice += itemResult.Data;
             }
             await _inventoryDbContext.SaveChangesAsync();
-            return await Result<long>.SuccessAsync(totalPrice);
+            return await Result<decimal>.SuccessAsync(totalPrice);
         }
         catch (Exception ex)
         {
             _logger.LogError($"Failed to reserve items: {ex.Message}");
-            return await Result<long>.FailureAsync(ex.Message);
+            return await Result<decimal>.FailureAsync(ex.Message);
         }
     }
     
-    private async Task<Result<long>> ReserveItemAsync(OrderItemDto request)
+    private async Task<Result<decimal>> ReserveItemAsync(OrderItemDto request)
     {
         var product = _inventoryDbContext.Products.Find(request.ProductId);
         if (product == null)
         {
-            return await Result<long>.FailureAsync("Product not found");
+            return await Result<decimal>.FailureAsync("Product not found");
         }
 
         if (product.Quantity >= request.Quantity)
@@ -106,8 +106,8 @@ public class InventoryService : IInventoryService
         }
         else
         {
-            return await Result<long>.FailureAsync("Quantity too low");
+            return await Result<decimal>.FailureAsync("Quantity too low");
         }
-        return await Result<long>.SuccessAsync();
+        return await Result<decimal>.SuccessAsync(product.Price * request.Quantity);
     }
 }
