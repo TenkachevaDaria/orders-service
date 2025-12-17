@@ -110,4 +110,20 @@ public class InventoryService : IInventoryService
         }
         return await Result<decimal>.SuccessAsync(product.Price * request.Quantity);
     }
+
+    public async Task<Result<None>> CancelReservationAsync(IReadOnlyList<OrderItemDto> itemDtos)
+    {
+        foreach (var item in itemDtos)
+        {
+            var product = _inventoryDbContext.Products.Find(item.ProductId);
+            if (product == null)
+            {
+                _logger.LogError($"Failed to caancel reservation: Product not found");
+                return await Result<None>.FailureAsync("Product not found");
+            }
+            product.Quantity += item.Quantity;
+        }
+        await _inventoryDbContext.SaveChangesAsync();
+        return await Result<None>.SuccessAsync();
+    }
 }
