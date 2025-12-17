@@ -1,12 +1,30 @@
+using PaymentService;
+using PaymentService.Application;
+using PaymentService.Infrastructure;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+    .AddJsonFile("Serilog.json", optional: true, reloadOnChange: false)
+    .AddEnvironmentVariables();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console(theme: SystemConsoleTheme.Literate)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
+builder.Host.UseSerilog();
+
+builder.Services
+    .AddContext(builder.Configuration)
+    .AddServices()
+    .AddApi()
+    .AddTransport(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -29,8 +29,11 @@ builder.Services.AddRebus(
             t.UseRabbitMq(builder.Configuration["Rabbit:ConnectionString"], "saga_queue"))
         .Routing(r => r.TypeBased()
             .Map<ReserveItemsCommand>("inventory_queue")
+            .Map<CancelReservationCommand>("inventory_queue")
             .Map<CancelOrderCommand>("order_queue")
-            .Map<OrderSucceededCommand>("order_queue"))
+            .Map<OrderPayingCommand>("order_queue")
+            .Map<OrderSucceededCommand>("order_queue")
+            .Map<PayOrderCommand>("payment_queue"))
         .Sagas(s => s.StoreInPostgres(
             builder.Configuration.GetConnectionString("RebusSql"),
             dataTableName: "RebusSagaData",

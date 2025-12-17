@@ -23,7 +23,7 @@ public class InventoryController : Controller
     [HttpGet]
     public async Task<IActionResult> GetProducts()
     {
-      var products = await _inventoryService.GetProductsAsync();
+        var products = await _inventoryService.GetProductsAsync();
         return Ok(products);
     }
     

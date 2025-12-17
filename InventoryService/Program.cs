@@ -49,6 +49,7 @@ builder.Services.AddRebus(configure => configure
         .Map<ItemsReservedEvent>("saga_queue")
         .Map<ItemsReservationFailedEvent>("saga_queue")));
 builder.Services.AutoRegisterHandlersFromAssemblyOf<OrderCreatedHandler>();
+builder.Services.AutoRegisterHandlersFromAssemblyOf<CancelReservationHandler>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

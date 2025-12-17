@@ -54,7 +54,7 @@ builder.Services.AddRebus(configure => configure
 builder.Services.AddScoped<IOrderService, OrdersService>();
 builder.Services.AutoRegisterHandlersFromAssemblyOf<OrderSucceededHandler>();
 builder.Services.AutoRegisterHandlersFromAssemblyOf<CancelOrderHandler>();
-
+builder.Services.AutoRegisterHandlersFromAssemblyOf<OrderPayingHandler>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

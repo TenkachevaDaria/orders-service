@@ -8,11 +8,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddContext(this IServiceCollection services, IConfiguration configuration)
     {
-        var databaseConnectionString = configuration.GetConnectionString("AppDatabase");
+        var databaseConnectionString = configuration.GetConnectionString("PaymentDb");
         if (string.IsNullOrWhiteSpace(databaseConnectionString))
             throw new ArgumentException("Database connection string is not initialized");
         services.AddDbContext<PaymentDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("OrderDb")));
+            options.UseNpgsql(configuration.GetConnectionString("PaymentDb")));
         services.AddScoped<IPaymentDbContext, PaymentDbContext>();
         return services;
     }
