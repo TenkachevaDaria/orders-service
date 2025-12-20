@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PaymentService.Application.DTOs;
 using PaymentService.Application.Interfaces;
 
 namespace PaymentService.Controllers;
@@ -22,10 +23,17 @@ public class AccountController(IAccountService accounts) : ControllerBase
         return data.Succeeded ? NoContent() : StatusCode(422, data);
     }
 
-    [HttpPost("{id:guid}")]
+    [HttpPatch("money/{id:guid}")]
     public async Task<IActionResult> AddMoney(Guid id, [FromQuery] decimal money)
     {
         var data = await accounts.AddMoneyAsync(id, money);
         return data.Succeeded ? NoContent() : StatusCode(422, data);
+    }
+    
+    [HttpPost()]
+    public async Task<IActionResult> CreateAccountAsync([FromBody] CreateAccountRequest request)
+    {
+        var data = await accounts.CreateAccountAsync(request);
+        return data.Succeeded ? Created() : StatusCode(422, data);
     }
 }

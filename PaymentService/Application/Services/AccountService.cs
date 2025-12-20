@@ -2,6 +2,7 @@
 using PaymentService.Application.DTOs;
 using PaymentService.Application.Interfaces;
 using PaymentService.Domain.Common;
+using PaymentService.Domain.Entities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PaymentService.Application.Services;
@@ -50,6 +51,20 @@ public class AccountService(IPaymentDbContext context, ILogger<AccountService> l
             logger.LogWarning($"Account with id {id} failed: {ex.Message}");
             return await Result<None>.FailureAsync(ex.Message);
         }
+    }
+
+    public async Task<Result<Guid>> CreateAccountAsync(CreateAccountRequest accountRequest)
+    {
+        var account =  new Account()
+        {
+            FullName = accountRequest.FullName,
+            Balance = accountRequest.Balance,
+        };
+        
+        context.Accounts.Add(account);
+        
+        await context.SaveChangesAsync();
+        return  await Result<Guid>.SuccessAsync(account.Id);
     }
 
     public async Task<Result<List<AccountDto>>> GetAccountsAsync()

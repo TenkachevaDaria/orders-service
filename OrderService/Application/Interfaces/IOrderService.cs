@@ -11,5 +11,6 @@ public interface IOrderService
     public  Task<Result<Guid>> CreateOrder(OrderRequest request);
 
     public Task<Result<List<OrderDto>>> GetOrders();
+    public Task<Result<List<OrderDto>>> GetOrdersById(Guid id);
 
 }

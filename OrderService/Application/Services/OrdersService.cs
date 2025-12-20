@@ -68,4 +68,10 @@ public class OrdersService : IOrderService
         var orders = _orderDbContext.Orders.ProjectTo<OrderDto>(_mapper.ConfigurationProvider).ToList();
         return await Result<List<OrderDto>>.SuccessAsync(orders);
     }
+    
+    public async Task<Result<List<OrderDto>>> GetOrdersById(Guid id)
+    {
+        var orders = _orderDbContext.Orders.Where(x => x.Id == id).ProjectTo<OrderDto>(_mapper.ConfigurationProvider).ToList();
+        return await Result<List<OrderDto>>.SuccessAsync(orders);
+    }
 }

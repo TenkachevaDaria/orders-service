@@ -1,3 +1,3 @@
 ﻿namespace Contracts.Commands;
 
-public record PayOrderCommand(Guid AccountId, decimal TotalPrice);
+public record PayOrderCommand(Guid OrderId, Guid AccountId, decimal TotalPrice);

@@ -37,5 +37,12 @@ public class OrdersController : Controller
         var result = await _orderService.GetOrders();
         return result.Succeeded ? Ok(result.Data) : BadRequest(result.Errors);
     }
+    
+    [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrders(Guid id)
+        {
+            var result = await _orderService.GetOrdersById(id);
+            return result.Succeeded ? Ok(result.Data) : BadRequest(result.Errors);
+        }
 }
     

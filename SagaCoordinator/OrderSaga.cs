@@ -9,7 +9,9 @@ namespace SagaCoordinator;
 public class OrderSaga : Saga<OrderSagaData>,
     IAmInitiatedBy<OrderCreatedEvent>,
     IHandleMessages<ItemsReservedEvent>,
-    IHandleMessages<ItemsReservationFailedEvent>
+    IHandleMessages<ItemsReservationFailedEvent>,
+    IHandleMessages<PaymentSucceededEvent>,
+    IHandleMessages<PaymentFailedEvent>
 {
     private readonly IBus _bus;
     private readonly ILogger<OrderSaga> _logger;
@@ -33,7 +35,7 @@ public class OrderSaga : Saga<OrderSagaData>,
     {
         Data.TotalPrice = message.TotalPrice;
         _logger.LogInformation($"Order {Data.OrderId} has been reserved");
-        await _bus.Send(new PayOrderCommand(Data.AccountId, message.TotalPrice));
+        await _bus.Send(new PayOrderCommand(Data.OrderId, Data.AccountId, message.TotalPrice));
     }
 
     public async Task Handle(ItemsReservationFailedEvent message)
@@ -62,6 +64,6 @@ public class OrderSaga : Saga<OrderSagaData>,
         config.Correlate<ItemsReservationFailedEvent>(msg => msg.OrderId, data => data.OrderId);
         config.Correlate<PaymentSucceededEvent>(msg => msg.OrderId, data => data.OrderId);
         config.Correlate<PaymentFailedEvent>(msg => msg.OrderId, data => data.OrderId);
-        _logger.LogInformation($"Order {Data.OrderId} has been correlated");
+        _logger.LogInformation($"Order has been correlated");
     }
 } 

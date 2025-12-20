@@ -8,4 +8,5 @@ public interface IAccountService
     public Task<Result<List<AccountDto>>> GetAccountsAsync();
     public Task<Result<None>> AddMoneyAsync(Guid accountId, decimal money);
     public Task<Result<None>> DeleteAccountAsync(Guid id);
+    public Task<Result<Guid>> CreateAccountAsync(CreateAccountRequest accountRequest);
 }
