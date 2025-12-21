@@ -6,18 +6,18 @@ using Rebus.Handlers;
 
 namespace PaymentService.Application.Handlers;
 
-public class PayOrderHandler(IBus bus, IPaymentService payments) : IHandleMessages<PayOrderCommand>
+public class PayOrderHandler(IPaymentService payments) : IHandleMessages<PayOrderCommand>
 {
     public async Task Handle(PayOrderCommand message)
     {
         try
         {
-            await payments.PayAsync(message.AccountId, message.TotalPrice);
-            await bus.Send(new PaymentSucceededEvent(message.OrderId));
+            await payments.PayAsync(message.AccountId, message.TotalPrice, message.OrderId);
+//            await bus.Send(new PaymentSucceededEvent(message.OrderId));
         }
         catch (Exception e)
         {
-            await bus.Send(new PaymentFailedEvent(message.OrderId, e.Message));
+//            await bus.Send(new PaymentFailedEvent(message.OrderId, e.Message));
         }
     }
 }

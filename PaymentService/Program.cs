@@ -1,6 +1,7 @@
 using PaymentService;
 using PaymentService.Application;
 using PaymentService.Infrastructure;
+using PaymentService.Infrastructure.Outbox;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -19,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
+builder.Services.AddHostedService<OutboxProcessor>();
 builder.Services
     .AddContext(builder.Configuration)
     .AddServices()

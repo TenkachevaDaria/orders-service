@@ -3,6 +3,7 @@ using Contracts.Events;
 using FluentValidation;
 using InventoryService.Application.Handlers;
 using InventoryService.Application.Interfaces;
+using InventoryService.Infrastructure.Outbox;
 using InventoryService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Rebus.Config;
@@ -50,6 +51,7 @@ builder.Services.AddRebus(configure => configure
         .Map<ItemsReservationFailedEvent>("saga_queue")));
 builder.Services.AutoRegisterHandlersFromAssemblyOf<OrderCreatedHandler>();
 builder.Services.AutoRegisterHandlersFromAssemblyOf<CancelReservationHandler>();
+builder.Services.AddHostedService<OutboxProcessor>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

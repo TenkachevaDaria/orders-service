@@ -8,6 +8,7 @@ namespace InventoryService.Infrastructure.Persistence;
 public class InventoryDbContext : DbContext, IInventoryDbContext
 {
     public DbSet<Product> Products { get; set; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
 
     public  InventoryDbContext(DbContextOptions< InventoryDbContext> options)

@@ -21,7 +21,7 @@ public class OrderCreatedHandler : IHandleMessages<ReserveItemsCommand>
 
     public async Task Handle(ReserveItemsCommand message)
     {
-        var result = await _inventoryService.ReserveItemsAsync(message.Items);
+        var result = await _inventoryService.ReserveItemsAsync(message.Items, message.OrderId);
 
         if (result.Succeeded)
         {
@@ -30,9 +30,8 @@ public class OrderCreatedHandler : IHandleMessages<ReserveItemsCommand>
                 message.OrderId,
                 message.Items.Count
             );
-
-            var evt = new ItemsReservedEvent(message.OrderId, result.Data);
-            await _bus.Send(evt);
+            
+//            await _bus.Send(evt);
         }
         else
         {
@@ -41,13 +40,9 @@ public class OrderCreatedHandler : IHandleMessages<ReserveItemsCommand>
                 message.OrderId,
                 string.Join(", ", result.Errors)
             );
+            
 
-            var evt = new ItemsReservationFailedEvent(
-                message.OrderId,
-                string.Join(",", result.Errors)
-            );
-
-            await _bus.Send(evt);
+            //            await _bus.Send(evt);
         }
     }
 }

@@ -8,5 +8,6 @@ public interface IPaymentDbContext
 {
     public DbSet<Account> Accounts { get; }
     public DatabaseFacade Database { get; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

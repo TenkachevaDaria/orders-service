@@ -6,7 +6,9 @@ namespace PaymentService.Infrastructure.Persistence;
 
 public class PaymentDbContext : DbContext, IPaymentDbContext
 {
-    public DbSet<Account> Accounts { get; private set; }
+    public DbSet<Account> Accounts { get; set; }
+    
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     public PaymentDbContext(DbContextOptions<PaymentDbContext> options)
         : base(options)

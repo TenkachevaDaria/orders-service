@@ -14,4 +14,15 @@ public class Product : BaseEntity
     
     [Column("quantity")]
     public int Quantity { get; set; }
+    
+    public decimal Reserve(int quantity)
+    {
+        if (Quantity < quantity)
+            throw new InvalidOperationException("Quantity too low");
+
+        Quantity -= quantity;
+
+        var total = Price * quantity;
+        return total;
+    }
 }

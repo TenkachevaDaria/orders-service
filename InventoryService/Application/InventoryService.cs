@@ -67,21 +67,36 @@ public class InventoryService : IInventoryService
         }
     }
 
-    public async Task<Result<decimal>> ReserveItemsAsync(IReadOnlyList<OrderItemDto> itemDtos)
+    public async Task<Result<decimal>> ReserveItemsAsync(IReadOnlyList<OrderItemDto> itemDtos, Guid orderId)
     {
         try
         {
             decimal totalPrice = 0;
             foreach (var item in itemDtos)
             {
-                var itemResult = await ReserveItemAsync(item);
-                if (!itemResult.Succeeded)
+                var product = await _inventoryDbContext.Products
+                    .FirstOrDefaultAsync(p => p.Id == item.ProductId);
+
+                if (product == null)
                 {
-                    _logger.LogError("Failed to reserve item");
-                    return await Result<decimal>.FailureAsync($"Ошибка {string.Join(',', itemResult.Errors)}");
+                    AddSagaFailureEvent(orderId, "Product not found");
+                    await _inventoryDbContext.SaveChangesAsync();
+                    return await Result<decimal>.FailureAsync("Product not found");
                 }
-                totalPrice += itemResult.Data;
+
+                try
+                {
+                    totalPrice += product.Reserve(item.Quantity);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    AddSagaFailureEvent(orderId, ex.Message);
+                    await _inventoryDbContext.SaveChangesAsync();
+                    return await Result<decimal>.FailureAsync(ex.Message);
+                }
             }
+
+            AddSagaSuccessEvent(orderId, totalPrice);
             await _inventoryDbContext.SaveChangesAsync();
             return await Result<decimal>.SuccessAsync(totalPrice);
         }
@@ -90,25 +105,6 @@ public class InventoryService : IInventoryService
             _logger.LogError($"Failed to reserve items: {ex.Message}");
             return await Result<decimal>.FailureAsync(ex.Message);
         }
-    }
-    
-    private async Task<Result<decimal>> ReserveItemAsync(OrderItemDto request)
-    {
-        var product = _inventoryDbContext.Products.Find(request.ProductId);
-        if (product == null)
-        {
-            return await Result<decimal>.FailureAsync("Product not found");
-        }
-
-        if (product.Quantity >= request.Quantity)
-        {
-            product.Quantity -= request.Quantity;
-        }
-        else
-        {
-            return await Result<decimal>.FailureAsync("Quantity too low");
-        }
-        return await Result<decimal>.SuccessAsync(product.Price * request.Quantity);
     }
 
     public async Task<Result<None>> CancelReservationAsync(IReadOnlyList<OrderItemDto> itemDtos)
@@ -126,4 +122,21 @@ public class InventoryService : IInventoryService
         await _inventoryDbContext.SaveChangesAsync();
         return await Result<None>.SuccessAsync();
     }
+    
+    private void AddSagaSuccessEvent(Guid orderId, decimal totalPrice)
+    {
+        _inventoryDbContext.OutboxMessages.Add(
+            OutboxMessage.ForSend(new ItemsReservedEvent(orderId, totalPrice), "saga"));
+    }
+
+    private void AddSagaFailureEvent(Guid orderId, string reason)
+    {
+        _inventoryDbContext.OutboxMessages.Add(
+            OutboxMessage.ForSend(
+                new ItemsReservationFailedEvent(orderId, reason),
+                destination: "saga_queue"
+            )
+        );
+    }
+
 }
